@@ -34,6 +34,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--kv-cache-mib", type=int, default=32)
     parser.add_argument("--block-size", type=int, default=128)
     parser.add_argument("--offload-mib", type=int, default=255)
+    parser.add_argument("--legomem-node-capacity-mib", type=int, default=256)
     parser.add_argument(
         "--offload-policy", choices=("lazy", "eager"), default="lazy"
     )
@@ -133,7 +134,9 @@ def main() -> None:
                 "legomem_host": "127.0.0.1",
                 "legomem_port": 9999,
                 "legomem_num_nodes": world_size,
-                "legomem_node_capacity_bytes": 256 * MIB,
+                "legomem_node_capacity_bytes": (
+                    args.legomem_node_capacity_mib * MIB
+                ),
             },
         }
 
@@ -194,6 +197,11 @@ def main() -> None:
             "block_size": args.block_size,
             "offload_mib_per_rank": (
                 0 if args.mode == "baseline" else args.offload_mib
+            ),
+            "legomem_node_capacity_mib": (
+                args.legomem_node_capacity_mib
+                if args.mode == "legomem"
+                else 0
             ),
             "offload_policy": (
                 args.offload_policy if args.mode != "baseline" else "none"
